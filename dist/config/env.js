@@ -9,6 +9,8 @@ const envSchema = zod_1.z.object({
     DB_USER: zod_1.z.string().min(1),
     DB_PASSWORD: zod_1.z.string().min(1),
     DB_NAME: zod_1.z.string().min(1),
+    JWT_ACCESS_SECRET: zod_1.z.string().min(32),
+    JWT_REFRESH_SECRET: zod_1.z.string().min(32),
 });
 const parsed = envSchema.safeParse(process.env);
 if (!parsed.success) {

@@ -1,6 +1,17 @@
-import { SignupInput } from "../validators/auth-schema";
+import { SignupInput, LoginInput } from "../validators/auth-schema";
 declare class AuthService {
-    signup(data: SignupInput): Promise<import("../repositories/user-repository").UserRow>;
+    signup(data: SignupInput): Promise<{
+        id: string;
+        email: string;
+        name: string;
+        created_at: Date;
+    }>;
+    login(data: LoginInput): Promise<{
+        id: string;
+        email: string;
+        name: string;
+        created_at: Date;
+    }>;
 }
 declare const _default: AuthService;
 export default _default;

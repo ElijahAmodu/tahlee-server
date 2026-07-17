@@ -6,4 +6,7 @@ export declare abstract class AppError extends Error {
 export declare class ConflictError extends AppError {
     readonly statusCode = 409;
 }
+export declare class UnauthorizedError extends AppError {
+    readonly statusCode = 401;
+}
 //# sourceMappingURL=AppError.d.ts.map

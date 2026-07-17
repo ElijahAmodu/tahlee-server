@@ -15,3 +15,7 @@ export abstract class AppError extends Error {
 export class ConflictError extends AppError {
   readonly statusCode = 409;
 }
+
+export class UnauthorizedError extends AppError {
+  readonly statusCode = 401;
+}

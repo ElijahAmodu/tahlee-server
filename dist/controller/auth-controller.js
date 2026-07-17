@@ -3,10 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signup = void 0;
+exports.login = exports.signup = void 0;
 const zod_1 = require("zod");
 const auth_schema_1 = require("../validators/auth-schema");
 const auth_service_1 = __importDefault(require("../services/auth-service"));
+const utils_1 = require("../utils/utils");
 const signup = async (req, res, next) => {
     try {
         const validationResult = auth_schema_1.signupSchema.safeParse(req.body);
@@ -32,4 +33,31 @@ const signup = async (req, res, next) => {
     }
 };
 exports.signup = signup;
+const login = async (req, res, next) => {
+    try {
+        const validationResult = auth_schema_1.loginSchema.safeParse(req.body);
+        if (!validationResult.success) {
+            return res.status(400).json({
+                errors: zod_1.z.treeifyError(validationResult.error),
+            });
+        }
+        const user = await auth_service_1.default.login(validationResult.data);
+        const accessToken = (0, utils_1.generateAccessToken)({
+            id: user.id,
+            email: user.email,
+        });
+        const refreshToken = (0, utils_1.generateRefreshToken)({
+            id: user.id,
+        });
+        return res.status(200).json({
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            user: user,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.login = login;
 //# sourceMappingURL=auth-controller.js.map
