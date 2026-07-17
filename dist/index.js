@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const auth_1 = __importDefault(require("./routes/auth"));
+const error_handler_1 = require("./middleware/error-handler");
 const app = (0, express_1.default)();
 const port = 3000;
 app.use(body_parser_1.default.urlencoded({ extended: false }));
@@ -15,6 +16,7 @@ app.get("/api", (req, res, next) => {
     res.send("Hello World!");
 });
 app.use("/auth", auth_1.default);
+app.use(error_handler_1.errorHandler);
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });

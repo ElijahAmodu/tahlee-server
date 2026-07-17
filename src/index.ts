@@ -3,6 +3,7 @@ import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/auth";
+import { errorHandler } from "./middleware/error-handler";
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,8 @@ app.get("/api", (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/auth", authRoutes);
+
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

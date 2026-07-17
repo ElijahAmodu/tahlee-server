@@ -22,7 +22,12 @@ export const signup = async (
     return res.status(201).json({
       success: true,
       message: "User signed up successfully",
-      data: user,
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        created_at: user.created_at,
+      },
     });
   } catch (error) {
     next(error);

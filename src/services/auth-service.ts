@@ -1,38 +1,24 @@
 import bcrypt from "bcryptjs";
 import { SignupInput } from "../validators/auth-schema";
-import { signupSchema } from "../validators/auth-schema";
+import { handlePgError } from "../db/pg-error";
+import userRepository from "../repositories/user-repository";
 
 class AuthService {
   async signup(data: SignupInput) {
     const { email, password, name } = data;
-
-    // TODO:
-    // Check database
-
-    const emailExistInDb = false;
-
-    if (emailExistInDb) {
-      throw new Error("Email already exists");
-    }
-
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const userData = {
-      email,
-      password: hashedPassword,
-      name,
-    };
+    try {
+      const user = await userRepository.create({
+        email,
+        password: hashedPassword,
+        name,
+      });
 
-    // TODO:
-    // Save user to database
-
-    const user = {
-      id: "temporary-id",
-      email: userData.email,
-      name: userData.name,
-    };
-
-    return user;
+      return user;
+    } catch (error) {
+      handlePgError(error);
+    }
   }
 }
 
