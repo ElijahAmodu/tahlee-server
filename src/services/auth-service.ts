@@ -60,6 +60,8 @@ class AuthService {
 
     return sentUser;
   }
+
+  async logout() {}
 }
 
 export default new AuthService();

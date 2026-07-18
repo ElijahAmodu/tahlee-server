@@ -9,7 +9,7 @@ interface AccessTokenPayload {
   email: string;
 }
 
-const authMiddleware = async (
+export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
