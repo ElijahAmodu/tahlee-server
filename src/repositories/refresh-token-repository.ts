@@ -4,7 +4,7 @@ interface RefreshTokenRow {
   id: string;
   user_id: string;
   token_hash: string;
-  expiry_at: Date;
+  expires_at: Date;
 }
 
 class RefreshTokenRepository {
@@ -14,7 +14,7 @@ class RefreshTokenRepository {
     expiresAt: Date;
   }): Promise<void> {
     await query(
-      `INSERT INTO refresh_tokens (user_id, token_hash, expiry_at)
+      `INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
         VALUES ($1, $2, $3)`,
       [data.userId, data.tokenHash, data.expiresAt],
     );

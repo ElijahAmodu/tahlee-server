@@ -3,6 +3,9 @@ import { SignupInput, LoginInput } from "../validators/auth-schema";
 import { handlePgError } from "../db/pg-error";
 import userRepository from "../repositories/user-repository";
 import { UnauthorizedError } from "../errors/AppError";
+import { generateAccessToken, generateRefreshToken } from "../utils/utils";
+import refreshTokenRepository from "../repositories/refresh-token-repository";
+import { hashToken } from "../utils/hash-token";
 
 function toPublicUser(user: {
   id: string;
@@ -51,17 +54,22 @@ class AuthService {
       throw new UnauthorizedError("Invalid credentials");
     }
 
-    const sentUser = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      created_at: user.created_at,
-    };
+    const publicUser = toPublicUser(user);
+    const accessToken = generateAccessToken({ id: user.id, email: user.email });
+    const refreshToken = generateRefreshToken({ id: user.id });
 
-    return sentUser;
+    await refreshTokenRepository.create({
+      userId: user.id,
+      tokenHash: hashToken(refreshToken),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    return { user: publicUser, accessToken, refreshToken };
   }
 
-  async logout() {}
+  async logout(refreshToken: string) {
+    await refreshTokenRepository.deleteByHash(hashToken(refreshToken));
+  }
 }
 
 export default new AuthService();
