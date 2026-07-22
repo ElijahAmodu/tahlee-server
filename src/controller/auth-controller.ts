@@ -1,6 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { loginSchema, signupSchema } from "../validators/auth-schema";
+import {
+  loginSchema,
+  signupSchema,
+  refreshTokenSchema,
+} from "../validators/auth-schema";
 import AuthService from "../services/auth-service";
 
 export const signup = async (
@@ -56,6 +60,33 @@ export const login = async (
       accessToken: accessToken,
       refreshToken: refreshToken,
       user: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const validationResult = refreshTokenSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        errors: z.treeifyError(validationResult.error),
+      });
+    }
+
+    const { accessToken, refreshToken } = await AuthService.refreshToken(
+      validationResult.data,
+    );
+
+    return res.status(200).json({
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   } catch (error) {
     next(error);

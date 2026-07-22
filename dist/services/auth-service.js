@@ -54,8 +54,43 @@ class AuthService {
         });
         return { user: publicUser, accessToken, refreshToken };
     }
+    async refreshToken(token) {
+        let verifiedToken;
+        try {
+            verifiedToken = (0, utils_1.verifyRefreshToken)(token.refreshToken);
+        }
+        catch {
+            throw new AppError_1.UnauthorizedError("Invalid or expired refresh token");
+        }
+        const { id } = verifiedToken;
+        const tokenHash = (0, hash_token_1.hashToken)(token.refreshToken);
+        const storedToken = await refresh_token_repository_1.default.findHash(tokenHash);
+        if (!storedToken) {
+            throw new AppError_1.UnauthorizedError("Refresh token has been revoked");
+        }
+        if (storedToken.revoked_at) {
+            await refresh_token_repository_1.default.revokeAllForUser(storedToken.user_id);
+            throw new AppError_1.UnauthorizedError("Session revoked — please log in again");
+        }
+        const user = await user_repository_1.default.findById(id);
+        if (!user) {
+            throw new AppError_1.UnauthorizedError("Invalid credentials");
+        }
+        await refresh_token_repository_1.default.revokeByHash(tokenHash);
+        const newRefreshToken = (0, utils_1.generateRefreshToken)({ id: user.id });
+        await refresh_token_repository_1.default.create({
+            userId: user.id,
+            tokenHash: (0, hash_token_1.hashToken)(newRefreshToken),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        });
+        const accessToken = (0, utils_1.generateAccessToken)({
+            id: user.id,
+            email: user.email,
+        });
+        return { accessToken: accessToken, refreshToken: newRefreshToken };
+    }
     async logout(refreshToken) {
-        await refresh_token_repository_1.default.deleteByHash((0, hash_token_1.hashToken)(refreshToken));
+        await refresh_token_repository_1.default.revokeByHash((0, hash_token_1.hashToken)(refreshToken));
     }
 }
 exports.default = new AuthService();

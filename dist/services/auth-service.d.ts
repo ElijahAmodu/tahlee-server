@@ -1,4 +1,4 @@
-import { SignupInput, LoginInput } from "../validators/auth-schema";
+import { SignupInput, LoginInput, refreshTokeninput } from "../validators/auth-schema";
 declare class AuthService {
     signup(data: SignupInput): Promise<{
         id: string;
@@ -13,6 +13,10 @@ declare class AuthService {
             name: string;
             created_at: Date;
         };
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    refreshToken(token: refreshTokeninput): Promise<{
         accessToken: string;
         refreshToken: string;
     }>;

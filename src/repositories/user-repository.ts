@@ -8,6 +8,13 @@ export interface UserRow {
   created_at: Date;
 }
 
+export interface RefreshRow {
+  id: string;
+  email: string;
+  name: string;
+  created_at: Date;
+}
+
 class UserRepository {
   async create(data: {
     email: string;
@@ -34,6 +41,15 @@ class UserRepository {
     const rows = await query<UserRow>(`SELECT * FROM users WHERE email = $1`, [
       email,
     ]);
+
+    return rows[0] ?? null;
+  }
+
+  async findById(id: string): Promise<RefreshRow | null> {
+    const rows = await query<RefreshRow>(
+      `SELECT id, email, name, created_at FROM users WHERE id = $1`,
+      [id],
+    );
 
     return rows[0] ?? null;
   }

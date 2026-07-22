@@ -5,6 +5,7 @@ interface RefreshTokenRow {
   user_id: string;
   token_hash: string;
   expires_at: Date;
+  revoked_at: Date | null;
 }
 
 class RefreshTokenRepository {
@@ -27,6 +28,22 @@ class RefreshTokenRepository {
     );
 
     return rows[0] ?? null;
+  }
+
+  async revokeByHash(tokenHash: string): Promise<void> {
+    await query(
+      `UPDATE refresh_tokens SET revoked_at = now()
+       WHERE token_hash = $1 AND revoked_at IS NULL`,
+      [tokenHash],
+    );
+  }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    await query(
+      `UPDATE refresh_tokens SET revoked_at = now()
+       WHERE user_id = $1 AND revoked_at IS NULL`,
+      [userId],
+    );
   }
 
   async deleteByHash(tokenHash: string): Promise<void> {

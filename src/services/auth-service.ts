@@ -1,9 +1,17 @@
 import bcrypt from "bcryptjs";
-import { SignupInput, LoginInput } from "../validators/auth-schema";
+import {
+  SignupInput,
+  LoginInput,
+  refreshTokeninput,
+} from "../validators/auth-schema";
 import { handlePgError } from "../db/pg-error";
 import userRepository from "../repositories/user-repository";
 import { UnauthorizedError } from "../errors/AppError";
-import { generateAccessToken, generateRefreshToken } from "../utils/utils";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../utils/utils";
 import refreshTokenRepository from "../repositories/refresh-token-repository";
 import { hashToken } from "../utils/hash-token";
 
@@ -67,8 +75,54 @@ class AuthService {
     return { user: publicUser, accessToken, refreshToken };
   }
 
+  async refreshToken(token: refreshTokeninput) {
+    let verifiedToken: { id: string };
+
+    try {
+      verifiedToken = verifyRefreshToken(token.refreshToken) as { id: string };
+    } catch {
+      throw new UnauthorizedError("Invalid or expired refresh token");
+    }
+
+    const { id } = verifiedToken;
+
+    const tokenHash = hashToken(token.refreshToken);
+    const storedToken = await refreshTokenRepository.findHash(tokenHash);
+
+    if (!storedToken) {
+      throw new UnauthorizedError("Refresh token has been revoked");
+    }
+
+    if (storedToken.revoked_at) {
+      await refreshTokenRepository.revokeAllForUser(storedToken.user_id);
+      throw new UnauthorizedError("Session revoked — please log in again");
+    }
+
+    const user = await userRepository.findById(id);
+
+    if (!user) {
+      throw new UnauthorizedError("Invalid credentials");
+    }
+
+    await refreshTokenRepository.revokeByHash(tokenHash);
+
+    const newRefreshToken = generateRefreshToken({ id: user.id });
+    await refreshTokenRepository.create({
+      userId: user.id,
+      tokenHash: hashToken(newRefreshToken),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    const accessToken = generateAccessToken({
+      id: user.id,
+      email: user.email,
+    });
+
+    return { accessToken: accessToken, refreshToken: newRefreshToken };
+  }
+
   async logout(refreshToken: string) {
-    await refreshTokenRepository.deleteByHash(hashToken(refreshToken));
+    await refreshTokenRepository.revokeByHash(hashToken(refreshToken));
   }
 }
 

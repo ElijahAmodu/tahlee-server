@@ -10,6 +10,14 @@ class RefreshTokenRepository {
         const rows = await (0, query_1.query)("SELECT * FROM refresh_tokens WHERE token_hash = $1", [tokenHash]);
         return rows[0] ?? null;
     }
+    async revokeByHash(tokenHash) {
+        await (0, query_1.query)(`UPDATE refresh_tokens SET revoked_at = now()
+       WHERE token_hash = $1 AND revoked_at IS NULL`, [tokenHash]);
+    }
+    async revokeAllForUser(userId) {
+        await (0, query_1.query)(`UPDATE refresh_tokens SET revoked_at = now()
+       WHERE user_id = $1 AND revoked_at IS NULL`, [userId]);
+    }
     async deleteByHash(tokenHash) {
         await (0, query_1.query)("DELETE FROM refresh_tokens WHERE token_hash = $1", [
             tokenHash,
