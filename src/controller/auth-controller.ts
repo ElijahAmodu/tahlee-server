@@ -1,8 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { loginSchema, signupSchema } from "../validators/auth-schema";
+import {
+  loginSchema,
+  signupSchema,
+  refreshTokenSchema,
+} from "../validators/auth-schema";
 import AuthService from "../services/auth-service";
-import { generateAccessToken, generateRefreshToken } from "../utils/utils";
 
 export const signup = async (
   req: Request,
@@ -49,14 +52,9 @@ export const login = async (
       });
     }
 
-    const user = await AuthService.login(validationResult.data);
-    const accessToken = generateAccessToken({
-      id: user.id,
-      email: user.email,
-    });
-    const refreshToken = generateRefreshToken({
-      id: user.id,
-    });
+    const { user, accessToken, refreshToken } = await AuthService.login(
+      validationResult.data,
+    );
 
     return res.status(200).json({
       accessToken: accessToken,
@@ -65,5 +63,54 @@ export const login = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const validationResult = refreshTokenSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        errors: z.treeifyError(validationResult.error),
+      });
+    }
+
+    const { accessToken, refreshToken } = await AuthService.refreshToken(
+      validationResult.data,
+    );
+
+    return res.status(200).json({
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken || typeof refreshToken !== "string") {
+      return res.status(400).json({
+        message: "refreshToken is required",
+      });
+    }
+
+    await AuthService.logout(refreshToken);
+
+    return res.status(200).json({ success: true, message: "logged out" });
+  } catch (err) {
+    next(err);
   }
 };

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
+import { verify } from "crypto";
 
 export const generateAccessToken = (data: { id: string; email: string }) => {
   const accessToken = jwt.sign(data, env.JWT_ACCESS_SECRET, {
@@ -15,4 +16,10 @@ export const generateRefreshToken = (data: { id: string }) => {
   });
 
   return refreshToken;
+};
+
+export const verifyRefreshToken = (token: string) => {
+  const verifiedToken = jwt.verify(token, env.JWT_REFRESH_SECRET);
+
+  return verifiedToken;
 };

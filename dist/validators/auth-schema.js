@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginSchema = exports.signupSchema = void 0;
+exports.refreshTokenSchema = exports.loginSchema = exports.signupSchema = void 0;
 const zod_1 = require("zod");
 exports.signupSchema = zod_1.z.object({
     email: zod_1.z.email("Invalid email address"),
@@ -10,5 +10,8 @@ exports.signupSchema = zod_1.z.object({
 exports.loginSchema = zod_1.z.object({
     email: zod_1.z.email("Invalid email address"),
     password: zod_1.z.string().min(8, "Password should be 8 or more characters"),
+});
+exports.refreshTokenSchema = zod_1.z.object({
+    refreshToken: zod_1.z.string().min(1),
 });
 //# sourceMappingURL=auth-schema.js.map

@@ -3,11 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.signup = void 0;
+exports.logout = exports.refreshToken = exports.login = exports.signup = void 0;
 const zod_1 = require("zod");
 const auth_schema_1 = require("../validators/auth-schema");
 const auth_service_1 = __importDefault(require("../services/auth-service"));
-const utils_1 = require("../utils/utils");
 const signup = async (req, res, next) => {
     try {
         const validationResult = auth_schema_1.signupSchema.safeParse(req.body);
@@ -41,14 +40,7 @@ const login = async (req, res, next) => {
                 errors: zod_1.z.treeifyError(validationResult.error),
             });
         }
-        const user = await auth_service_1.default.login(validationResult.data);
-        const accessToken = (0, utils_1.generateAccessToken)({
-            id: user.id,
-            email: user.email,
-        });
-        const refreshToken = (0, utils_1.generateRefreshToken)({
-            id: user.id,
-        });
+        const { user, accessToken, refreshToken } = await auth_service_1.default.login(validationResult.data);
         return res.status(200).json({
             accessToken: accessToken,
             refreshToken: refreshToken,
@@ -60,4 +52,39 @@ const login = async (req, res, next) => {
     }
 };
 exports.login = login;
+const refreshToken = async (req, res, next) => {
+    try {
+        const validationResult = auth_schema_1.refreshTokenSchema.safeParse(req.body);
+        if (!validationResult.success) {
+            return res.status(400).json({
+                errors: zod_1.z.treeifyError(validationResult.error),
+            });
+        }
+        const { accessToken, refreshToken } = await auth_service_1.default.refreshToken(validationResult.data);
+        return res.status(200).json({
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.refreshToken = refreshToken;
+const logout = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken || typeof refreshToken !== "string") {
+            return res.status(400).json({
+                message: "refreshToken is required",
+            });
+        }
+        await auth_service_1.default.logout(refreshToken);
+        return res.status(200).json({ success: true, message: "logged out" });
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.logout = logout;
 //# sourceMappingURL=auth-controller.js.map

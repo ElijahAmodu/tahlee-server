@@ -18,6 +18,10 @@ class UserRepository {
         ]);
         return rows[0] ?? null;
     }
+    async findById(id) {
+        const rows = await (0, query_1.query)(`SELECT id, email, name, created_at FROM users WHERE id = $1`, [id]);
+        return rows[0] ?? null;
+    }
 }
 exports.default = new UserRepository();
 //# sourceMappingURL=user-repository.js.map

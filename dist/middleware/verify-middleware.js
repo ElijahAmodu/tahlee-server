@@ -31,4 +31,5 @@ const authMiddleware = async (req, res, next) => {
     req.user = user;
     next();
 };
+exports.default = authMiddleware;
 //# sourceMappingURL=verify-middleware.js.map
