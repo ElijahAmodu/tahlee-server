@@ -1,4 +1,3 @@
-// const express = require("express");
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
