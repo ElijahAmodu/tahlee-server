@@ -1,6 +1,6 @@
 import { SongRow } from "../repositories/song-repository";
-declare class SnngServices {
-    createPlaylist(data: {
+declare class SongServices {
+    createSong(data: {
         name: string;
         artist: string;
         audio_url: string;
@@ -9,6 +9,6 @@ declare class SnngServices {
         added_by: string;
     }): Promise<SongRow>;
 }
-declare const _default: SnngServices;
+declare const _default: SongServices;
 export default _default;
 //# sourceMappingURL=song-service.d.ts.map

@@ -1,8 +1,8 @@
 import { handlePgError } from "../db/pg-error";
 import songRepository, { SongRow } from "../repositories/song-repository";
 
-class SnngServices {
-  async createPlaylist(data: {
+class SongServices {
+  async createSong(data: {
     name: string;
     artist: string;
     audio_url: string;
@@ -13,7 +13,7 @@ class SnngServices {
     try {
       const { name, artist, audio_url, image_url, duration, added_by } = data;
 
-      const createdPlaylistData = await songRepository.create({
+      const createdSongData = await songRepository.create({
         name: name,
         artist: artist,
         audio_url: audio_url,
@@ -22,11 +22,11 @@ class SnngServices {
         added_by: added_by,
       });
 
-      return createdPlaylistData;
+      return createdSongData;
     } catch (error) {
       handlePgError(error);
     }
   }
 }
 
-export default new SnngServices();
+export default new SongServices();

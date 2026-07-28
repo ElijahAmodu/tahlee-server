@@ -17,15 +17,15 @@ export const createSong = async (
       });
     }
 
-    const playlist = await songService.createPlaylist({
+    const song = await songService.createSong({
       ...validationResult.data,
       added_by: req.user!.id,
     });
 
     return res.status(201).json({
       success: true,
-      message: "Playlist created successfully",
-      playlist: playlist,
+      message: "Song Uploaded successfully",
+      song: song,
     });
   } catch (error) {
     next(error);

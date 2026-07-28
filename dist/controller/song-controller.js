@@ -15,14 +15,14 @@ const createSong = async (req, res, next) => {
                 errors: zod_1.default.treeifyError(validationResult.error),
             });
         }
-        const playlist = await song_service_1.default.createPlaylist({
+        const song = await song_service_1.default.createSong({
             ...validationResult.data,
             added_by: req.user.id,
         });
         return res.status(201).json({
             success: true,
-            message: "Playlist created successfully",
-            playlist: playlist,
+            message: "Song Uploaded successfully",
+            song: song,
         });
     }
     catch (error) {
