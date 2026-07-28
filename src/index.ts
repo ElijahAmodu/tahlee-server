@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/auth";
 import playlistRoutes from "./routes/playlist";
+import songRoutes from "./routes/song";
 import { errorHandler } from "./middleware/error-handler";
 
 const app = express();
@@ -17,6 +18,7 @@ app.get("/api", (req: Request, res: Response, next: NextFunction) => {
 
 app.use("/auth", authRoutes);
 app.use("/playlist", playlistRoutes);
+app.use("/song", songRoutes);
 
 app.use(errorHandler);
 
