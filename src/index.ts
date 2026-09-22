@@ -7,7 +7,7 @@ import songRoutes from "./routes/song";
 import { errorHandler } from "./middleware/error-handler";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 8080;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
